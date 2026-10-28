@@ -4,7 +4,9 @@ import co.umariana.conexion.ConexionBD;
 import co.umariana.modelo.Estudiante;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,16 +71,29 @@ public class EstudianteDAO {
     }
 
     // =====================================================================
-    // ETAPA 2. Listar (SELECT)
-    // =====================================================================
+// ETAPA 2. Listar (SELECT)
+// =====================================================================
 
-    /** @return todos los estudiantes ordenados por id; lista vacía si no hay o si hay un error */
-    public List<Estudiante> listar() {
-        // TODO Etapa 2: SELECT id, nombre, correo, semestre FROM estudiantes ORDER BY id
-        //               Use executeQuery() y recorra el ResultSet con while (rs.next()),
-        //               creando un Estudiante por cada fila y agregándolo a un ArrayList.
-        throw new UnsupportedOperationException("TODO: listar");
+/** @return todos los estudiantes ordenados por id; lista vacía si no hay o si hay un error */
+public List<Estudiante> listar() {
+    List<Estudiante> lista = new ArrayList<>();
+    String sql = "SELECT id, nombre, correo, semestre FROM estudiantes ORDER BY id";
+    try (Connection con = ConexionBD.conectar();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            Estudiante e = new Estudiante(0, sql, sql, 0);
+            e.setId(rs.getInt("id"));
+            e.setNombre(rs.getString("nombre"));
+            e.setCorreo(rs.getString("correo"));
+            e.setSemestre(rs.getInt("semestre"));
+            lista.add(e);
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al listar: " + e.getMessage());
     }
+    return lista;
+}
 
     // =====================================================================
     // ETAPA 3. Buscar por id (SELECT ... WHERE)
