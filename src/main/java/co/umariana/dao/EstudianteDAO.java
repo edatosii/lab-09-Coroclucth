@@ -96,37 +96,70 @@ public List<Estudiante> listar() {
 }
 
     // =====================================================================
-    // ETAPA 3. Buscar por id (SELECT ... WHERE)
-    // =====================================================================
+// ETAPA 3. Buscar por id (SELECT ... WHERE)
+// =====================================================================
 
-    /** @return el estudiante con ese id, o null si no existe (o si hay un error) */
-    public Estudiante buscarPorId(int id) {
-        // TODO Etapa 3: SELECT id, nombre, correo, semestre FROM estudiantes WHERE id = ?
-        throw new UnsupportedOperationException("TODO: buscarPorId");
+/** @return el estudiante con ese id, o null si no existe (o si hay un error) */
+public Estudiante buscarPorId(int id) {
+    String sql = "SELECT id, nombre, correo, semestre FROM estudiantes WHERE id = ?";
+    try (Connection con = ConexionBD.conectar();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                Estudiante e = new Estudiante(id, sql, sql, id);
+                e.setId(rs.getInt("id"));
+                e.setNombre(rs.getString("nombre"));
+                e.setCorreo(rs.getString("correo"));
+                e.setSemestre(rs.getInt("semestre"));
+                return e;
+            }
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al buscar: " + e.getMessage());
     }
+    return null;
+}
 
-    // =====================================================================
-    // ETAPA 4. Actualizar (UPDATE)
-    // =====================================================================
+// =====================================================================
+// ETAPA 4. Actualizar (UPDATE)
+// =====================================================================
 
-    /**
-     * Cambia nombre, correo y semestre del estudiante cuyo id es estudiante.getId().
-     *
-     * @return true si se actualizó; false si no existe ese id o si hubo un error
-     *         (por ejemplo, correo ya usado por OTRO estudiante)
-     */
-    public boolean actualizar(Estudiante estudiante) {
-        // TODO Etapa 4: UPDATE estudiantes SET nombre = ?, correo = ?, semestre = ? WHERE id = ?
-        throw new UnsupportedOperationException("TODO: actualizar");
+/**
+ * Cambia nombre, correo y semestre del estudiante cuyo id es estudiante.getId().
+ *
+ * @return true si se actualizó; false si no existe ese id o si hubo un error
+ *         (por ejemplo, correo ya usado por OTRO estudiante)
+ */
+public boolean actualizar(Estudiante estudiante) {
+    String sql = "UPDATE estudiantes SET nombre = ?, correo = ?, semestre = ? WHERE id = ?";
+    try (Connection con = ConexionBD.conectar();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, estudiante.getNombre());
+        ps.setString(2, estudiante.getCorreo());
+        ps.setInt(3, estudiante.getSemestre());
+        ps.setInt(4, estudiante.getId());
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        System.out.println("Error al actualizar: " + e.getMessage());
+        return false;
     }
+}
 
-    // =====================================================================
-    // ETAPA 5. Eliminar (DELETE)
-    // =====================================================================
+// =====================================================================
+// ETAPA 5. Eliminar (DELETE)
+// =====================================================================
 
-    /** @return true si se eliminó; false si no existía ese id o si hubo un error */
-    public boolean eliminar(int id) {
-        // TODO Etapa 5: DELETE FROM estudiantes WHERE id = ?
-        throw new UnsupportedOperationException("TODO: eliminar");
+/** @return true si se eliminó; false si no existía ese id o si hubo un error */
+public boolean eliminar(int id) {
+    String sql = "DELETE FROM estudiantes WHERE id = ?";
+    try (Connection con = ConexionBD.conectar();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, id);
+        return ps.executeUpdate() > 0;
+    } catch (SQLException e) {
+        System.out.println("Error al eliminar: " + e.getMessage());
+        return false;
     }
+}
 }
